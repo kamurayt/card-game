@@ -296,23 +296,30 @@ h1,h2,h3{margin:10px 0}
 
 <script>
 const CARD_MASTER=[
-{id:"No.1",name:"仮カード1",type:"monster",attr:"火",rarity:1,atk:500,def:250,dmg:1},
-{id:"No.2",name:"仮カード2",type:"monster",attr:"火",rarity:1,atk:500,def:500,dmg:1},
-{id:"No.3",name:"仮カード3",type:"monster",attr:"火",rarity:2,atk:1000,def:250,dmg:2},
-{id:"No.4",name:"壁モンスター",type:"monster",attr:"火",rarity:2,atk:500,def:2500,dmg:0},
-{id:"No.5",name:"速攻兵",type:"monster",attr:"火",rarity:3,atk:1300,def:1000,dmg:2},
-{id:"No.6",name:"守護兵",type:"monster",attr:"火",rarity:3,atk:1000,def:2000,dmg:1},
-{id:"No.7",name:"双剣兵",type:"monster",attr:"火",rarity:4,atk:1500,def:1000,dmg:2,attackLimit:2,effect:"2回攻撃可能"},
-{id:"No.8",name:"鉄壁兵",type:"monster",attr:"火",rarity:4,atk:750,def:3000,dmg:1,blockLimit:2,effect:"2回ブロック可能"},
-{id:"No.9",name:"レア5モンスター",type:"monster",attr:"火",rarity:5,atk:2500,def:2000,dmg:2,effect:"レア度合計5以上を墓地へ送って特殊召喚"},
-{id:"No.10",name:"暗殺竜",type:"monster",attr:"火",rarity:5,atk:1000,def:1000,dmg:4,effect:"レア度合計5以上を墓地へ送って特殊召喚"},
-{id:"S1",name:"攻撃強化",type:"spell",effect:"自分の場の先頭モンスターのATK+500",spell:"atkUp"},
-{id:"S2",name:"防御強化",type:"spell",effect:"自分の場の先頭モンスターのDEF+500",spell:"defUp"},
-{id:"S3",name:"防御弱体",type:"spell",effect:"相手の場の先頭モンスターのDEF-500",spell:"defDown"},
-{id:"S4",name:"破壊魔法",type:"spell",effect:"DEF1000以下の相手モンスター1体を破壊",spell:"destroyWeak"},
-{id:"S5",name:"攻守変換",type:"spell",effect:"自分の場の先頭モンスターのATKをDEFと同じにする",spell:"defToAtk"}
-];
 
+{id:"No.1",name:"No.1",type:"monster",attr:"火",rarity:1,atk:500,def:250,dmg:1,effect:""},
+{id:"No.2",name:"No.2",type:"monster",attr:"水",rarity:1,atk:500,def:500,dmg:1,effect:""},
+{id:"No.3",name:"No.3",type:"monster",attr:"闇",rarity:2,atk:1000,def:250,dmg:2,effect:""},
+{id:"No.4",name:"No.4",type:"monster",attr:"光",rarity:2,atk:700,def:1500,dmg:1,effect:""},
+{id:"No.5",name:"No.5",type:"monster",attr:"火",rarity:3,atk:1300,def:1000,dmg:1,effect:""},
+{id:"No.6",name:"No.6",type:"monster",attr:"水",rarity:3,atk:500,def:2500,dmg:0,effect:""},
+{id:"No.7",name:"No.7",type:"monster",attr:"闇",rarity:4,atk:1500,def:1000,dmg:2,effect:""},
+{id:"No.8",name:"No.8",type:"monster",attr:"光",rarity:4,atk:1000,def:2000,dmg:1,effect:"2回攻撃可能",attackLimit:2},
+{id:"No.9",name:"No.9",type:"monster",attr:"火",rarity:5,atk:2500,def:2000,dmg:2,effect:"レア度合計5以上を墓地へ送って特殊召喚"},
+{id:"No.10",name:"No.10",type:"monster",attr:"闇",rarity:5,atk:500,def:500,dmg:4,effect:"レア度合計5以上を墓地へ送って特殊召喚"},
+{id:"No.11",name:"No.11",type:"monster",attr:"火",rarity:2,atk:900,def:800,dmg:1,effect:""},
+{id:"No.12",name:"No.12",type:"monster",attr:"水",rarity:3,atk:1200,def:1600,dmg:1,effect:""},
+{id:"No.13",name:"No.13",type:"monster",attr:"闇",rarity:4,atk:1800,def:1200,dmg:2,effect:""},
+{id:"No.14",name:"No.14",type:"monster",attr:"光",rarity:4,atk:1400,def:2400,dmg:1,effect:"2回ブロック可能",blockLimit:2},
+
+{id:"No.15",name:"No.15",type:"spell",effect:"自分モンスター1体のATK+500",spell:"atkUp"},
+{id:"No.16",name:"No.16",type:"spell",effect:"自分モンスター1体のDEF+500",spell:"defUp"},
+{id:"No.17",name:"No.17",type:"spell",effect:"相手モンスター1体のDEF-500",spell:"defDown"},
+{id:"No.18",name:"No.18",type:"spell",effect:"DEF1000以下の相手モンスター1体を破壊",spell:"destroyWeak"},
+{id:"No.19",name:"No.19",type:"spell",effect:"自分モンスター1体のATKをDEFと同じにする",spell:"defToAtk"},
+{id:"No.20",name:"No.20",type:"spell",effect:"カードを1枚ドロー",spell:"draw"}
+
+];
 let players=[];
 let turn=0;
 let selected=null;

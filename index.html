@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TCG Prototype</title>
+
+  <style>
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      background:#10131f;
+      color:white;
+      font-family:sans-serif;
+      padding:10px;
+    }
+
+    h1{
+      margin-top:0;
+      font-size:22px;
+    }
+
+    .top{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+
+    button{
+      padding:8px 12px;
+      border:none;
+      border-radius:8px;
+      background:#4f6cff;
+      color:white;
+      font-weight:bold;
+    }
+
+    .player{
+      border:2px solid #30395e;
+      border-radius:12px;
+      padding:10px;
+      margin-bottom:12px;
+      background:#181c2d;
+    }
+
+    .active{
+      border-color:#ffd166;
+    }
+
+    .cards{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      margin-top:8px;
+    }
+
+    .card{
+      min-width:120px;
+      background:#2a304b;
+      border-radius:10px;
+      padding:8px;
+      border:1px solid #50597d;
+    }
+
+    .selected{
+      outline:3px solid yellow;
+    }
+
+    .spell{
+      background:#1f5860;
+    }
+
+    .name{
+      font-weight:bold;
+      margin-bottom:5px;
+    }
+
+    .effect{
+      font-size:11px;
+      margin-top:6px;
+    }
+
+    .log{
+      background:#090b12;
+      border-radius:10px;
+      padding:10px;
+      max-height:180px;
+      overflow-y:auto;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>TCG Prototype</h1>
+
+<div class="top">
+  <button onclick="drawCard()">ドロー</button>
+  <button onclick="normalSummon()">通常召喚</button>
+  <button onclick="specialSummon()">特殊召喚</button>
+  <button onclick="attack()">攻撃</button>
+  <button onclick="endTurn()">ターン終了</button>
+</div>
+
+<div id="turnText"></div>
+
+<div id="player2"></div>
+<div id="player1"></div>
+
+<h3>ログ</h3>
+<div class="log" id="log"></div>
+
+<script>
+
+const cards = [
+{
+  id:"No.1",
+  name:"仮カード1",
+  type:"monster",
+  rarity:1,
+  atk:500,
+  def:250,
+  dmg:1
+},
+{
+  id:"No.2",
+  name:"仮カード2",
+  type:"monster",
+  rarity:1,
+  atk:500,
+  def:500,
+  dmg:1
+},
+{
+  id:"No.3",
+  name:"仮カード3",
+  type:"monster",
+  rarity:2,
+  atk:1000,
+  def:250,
+  dmg:2
+},
+{
+  id:"No.4",
+  name:"壁モンスター",
+  type:"monster",
+  rarity:2,
+  atk:500,
+  def:2500,
+  dmg:0
+},
+{
+  id:"No.5",
+  name:"レア5モンスター",
+  type:"monster",
+  rarity:5,
+  atk:2500,
+  def:2000,
+  dmg:2
+},
+{
+  id:"S1",
+  name:"攻撃強化",
+  type:"spell",
+  effect:"ATK+500"
+}
+];
+
+let players;
+let turn = 0;
+let selected = null;
+let summoned = false;
+let attackMode = false;
+
+function clone(card){
+  return JSON.parse(JSON.stringify(card));
+}
+
+function makeDeck(){
+  let deck = [];
+
+  for(let i=0;i<3;i++){
+    deck.push(clone(cards[0]));
+    deck.push(clone(cards[1]));
+    deck.push(clone(cards[2]));
+    deck.push(clone(cards[3]));
+  }
+
+  deck.push(clone(cards[4]));
+  deck.push(clone(cards[5]));
+
+  return shuffle(deck);
+}
+
+function shuffle(array){
+  for(let i=array.length-1;i>0;i--){
+    let j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+  }
+  return array;
+}
+
+function startGame(){
+
+  players = [
+    {
+      name:"プレイヤー1",
+      life:20,
+      deck:makeDeck(),
+      hand:[],
+      field:[],
+      grave:[]
+    },
+    {
+      name:"プレイヤー2",
+      life:20,
+      deck:makeDeck(),
+      hand:[],
+      field:[],
+      grave:[]
+    }
+  ];
+
+  for(let p of players){
+    for(let i=0;i<5;i++){
+      p.hand.push(p.deck.pop());
+    }
+  }
+
+  render();
+}
+
+function currentPlayer(){
+  return players[turn];
+}
+
+function enemyPlayer(){
+  return players[1-turn];
+}
+
+function drawCard(){
+
+  let p=currentPlayer();
+
+  if(p.deck.length===0){
+    addLog(p.name+"は山札切れ");
+    return;
+  }
+
+  p.hand.push(p.deck.pop());
+
+  addLog(p.name+"が1枚ドロー");
+
+  render();
+}
+
+function normalSummon(){
+
+  let p=currentPlayer();
+
+  if(summoned){
+    alert("通常召喚は1回まで");
+    return;
+  }
+
+  if(selected===null){
+    alert("手札モンスター選択");
+    return;
+  }
+
+  let card=p.hand[selected];
+
+  if(card.type!=="monster"){
+    alert("モンスター選択");
+    return;
+  }
+
+  if(card.rarity>=5){
+    alert("レア5以上は特殊召喚");
+    return;
+  }
+
+  p.hand.splice(selected,1);
+
+  p.field.push(card);
+
+  summoned=true;
+
+  addLog(card.name+"を通常召喚");
+
+  selected=null;
+
+  render();
+}
+
+function specialSummon(){
+
+  let p=currentPlayer();
+
+  if(selected===null){
+    alert("手札モンスター選択");
+    return;
+  }
+
+  let card=p.hand[selected];
+
+  if(card.rarity<5){
+    alert("レア5未満");
+    return;
+  }
+
+  let total=0;
+
+  for(let c of p.field){
+    total+=c.rarity;
+  }
+
+  if(total<card.rarity){
+    alert("素材不足");
+    return;
+  }
+
+  while(total>=card.rarity){
+
+    let send=p.field.shift();
+
+    total-=send.rarity;
+
+    p.grave.push(send);
+  }
+
+  p.hand.splice(selected,1);
+
+  p.field.push(card);
+
+  addLog(card.name+"を特殊召喚");
+
+  selected=null;
+
+  render();
+}
+
+function attack(){
+
+  let p=currentPlayer();
+  let e=enemyPlayer();
+
+  if(selected===null){
+    alert("攻撃モンスター選択");
+    return;
+  }
+
+  let attacker=p.field[selected];
+
+  if(!attacker){
+    alert("場のモンスター選択");
+    return;
+  }
+
+  if(e.field.length>0){
+
+    let blocker=e.field[0];
+
+    if(attacker.atk>blocker.def){
+
+      e.grave.push(e.field.shift());
+
+      addLog(blocker.name+"を破壊");
+
+    }else if(attacker.atk<blocker.def){
+
+      p.grave.push(p.field.splice(selected,1)[0]);
+
+      addLog(attacker.name+"が破壊");
+
+    }else{
+
+      e.grave.push(e.field.shift());
+
+      p.grave.push(p.field.splice(selected,1)[0]);
+
+      addLog("相打ち");
+    }
+
+  }else{
+
+    e.life-=attacker.dmg;
+
+    addLog(attacker.name+"が直接攻撃");
+  }
+
+  checkWin();
+
+  selected=null;
+
+  render();
+}
+
+function endTurn(){
+
+  turn=1-turn;
+
+  summoned=false;
+
+  selected=null;
+
+  addLog(currentPlayer().name+"のターン");
+
+  render();
+}
+
+function selectHand(index){
+
+  selected=index;
+
+  render();
+}
+
+function selectField(index){
+
+  selected=index;
+
+  render();
+}
+
+function addLog(text){
+
+  let log=document.getElementById("log");
+
+  log.innerHTML="・"+text+"<br>"+log.innerHTML;
+}
+
+function checkWin(){
+
+  for(let p of players){
+
+    if(p.life<=0){
+
+      alert(p.name+"敗北");
+    }
+  }
+}
+
+function renderPlayer(player,index){
+
+  let html=`
+  <div class="player ${turn===index ? "active":""}">
+    <h2>${player.name}</h2>
+    <div>LP:${player.life}</div>
+
+    <h3>場</h3>
+    <div class="cards">
+  `;
+
+  player.field.forEach((card,i)=>{
+
+    html+=`
+    <div
+      class="card ${selected===i && turn===index ? "selected":""}"
+      onclick="selectField(${i})"
+    >
+      <div class="name">${card.name}</div>
+
+      <div>★${card.rarity}</div>
+
+      <div>ATK:${card.atk}</div>
+      <div>DEF:${card.def}</div>
+      <div>DMG:${card.dmg}</div>
+    </div>
+    `;
+  });
+
+  html+=`</div>`;
+
+  html+=`
+    <h3>手札</h3>
+    <div class="cards">
+  `;
+
+  player.hand.forEach((card,i)=>{
+
+    html+=`
+    <div
+      class="card ${card.type==="spell" ? "spell":""} ${selected===i && turn===index ? "selected":""}"
+      onclick="selectHand(${i})"
+    >
+      <div class="name">${card.name}</div>
+      <div>${card.type}</div>
+
+      ${
+        card.type==="monster"
+        ?
+        `
+        <div>★${card.rarity}</div>
+        <div>ATK:${card.atk}</div>
+        <div>DEF:${card.def}</div>
+        <div>DMG:${card.dmg}</div>
+        `
+        :
+        `
+        <div class="effect">${card.effect}</div>
+        `
+      }
+    </div>
+    `;
+  });
+
+  html+=`</div></div>`;
+
+  return html;
+}
+
+function render(){
+
+  document.getElementById("turnText").innerHTML=
+  "<h2>"+currentPlayer().name+"のターン</h2>";
+
+  document.getElementById("player1").innerHTML=
+  renderPlayer(players[0],0);
+
+  document.getElementById("player2").innerHTML=
+  renderPlayer(players[1],1);
+}
+
+startGame();
+
+</script>
+
+</body>
+</html>

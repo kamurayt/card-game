@@ -1,533 +1,608 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TCG Prototype</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TCG Prototype</title>
 
-  <style>
-    *{
-      box-sizing:border-box;
-    }
-
-    body{
-      margin:0;
-      background:#10131f;
-      color:white;
-      font-family:sans-serif;
-      padding:10px;
-    }
-
-    h1{
-      margin-top:0;
-      font-size:22px;
-    }
-
-    .top{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:10px;
-    }
-
-    button{
-      padding:8px 12px;
-      border:none;
-      border-radius:8px;
-      background:#4f6cff;
-      color:white;
-      font-weight:bold;
-    }
-
-    .player{
-      border:2px solid #30395e;
-      border-radius:12px;
-      padding:10px;
-      margin-bottom:12px;
-      background:#181c2d;
-    }
-
-    .active{
-      border-color:#ffd166;
-    }
-
-    .cards{
-      display:flex;
-      gap:8px;
-      overflow-x:auto;
-      margin-top:8px;
-    }
-
-    .card{
-      min-width:120px;
-      background:#2a304b;
-      border-radius:10px;
-      padding:8px;
-      border:1px solid #50597d;
-    }
-
-    .selected{
-      outline:3px solid yellow;
-    }
-
-    .spell{
-      background:#1f5860;
-    }
-
-    .name{
-      font-weight:bold;
-      margin-bottom:5px;
-    }
-
-    .effect{
-      font-size:11px;
-      margin-top:6px;
-    }
-
-    .log{
-      background:#090b12;
-      border-radius:10px;
-      padding:10px;
-      max-height:180px;
-      overflow-y:auto;
-    }
-  </style>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#0d1020;
+  color:white;
+}
+button{
+  border:none;
+  border-radius:10px;
+  padding:10px 14px;
+  font-weight:bold;
+  background:#4f6cff;
+  color:white;
+  font-size:16px;
+}
+button:disabled{
+  background:#555;
+  opacity:.6;
+}
+.screen{display:none;padding:16px}
+.screen.active{display:block}
+h1,h2,h3{margin:8px 0}
+.home{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:18px;
+  text-align:center;
+}
+.menu-btn{
+  width:100%;
+  max-width:320px;
+  margin:0 auto;
+  font-size:22px;
+  padding:16px;
+}
+.battle{
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:8px;
+  min-height:100vh;
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  background:#171b33;
+  padding:10px;
+  border-bottom:2px solid #30385f;
+}
+.info{
+  font-size:14px;
+}
+.field{
+  display:grid;
+  grid-template-rows:auto auto auto auto auto;
+  gap:8px;
+  padding:8px;
+}
+.player-area{
+  border:2px solid #30385f;
+  border-radius:14px;
+  padding:8px;
+  background:#171b33;
+}
+.player-area.turn{
+  border-color:#ffd166;
+  box-shadow:0 0 10px #ffd16688;
+}
+.row-title{
+  font-weight:bold;
+  font-size:13px;
+  margin-bottom:4px;
+  color:#cfd6ff;
+}
+.zone{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+  margin-bottom:8px;
+}
+.slot{
+  min-height:92px;
+  border:1px dashed #4f587e;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#6f789e;
+  font-size:12px;
+  background:#101427;
+}
+.hand{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:8px;
+}
+.card{
+  min-width:95px;
+  max-width:95px;
+  min-height:130px;
+  border:1px solid #65709c;
+  border-radius:10px;
+  padding:6px;
+  background:#252b4a;
+  font-size:12px;
+}
+.card.monster{background:#2a2f52}
+.card.spell{background:#1f5860}
+.card.selected{
+  outline:3px solid #ffd166;
+  box-shadow:0 0 12px #ffd166;
+}
+.card.used{opacity:.55}
+.card-name{
+  font-weight:bold;
+  font-size:13px;
+  margin-bottom:4px;
+  word-break:break-all;
+}
+.effect{
+  font-size:10px;
+  color:#e6e6e6;
+  margin-top:4px;
+}
+.center{
+  background:#080a14;
+  border:1px solid #30385f;
+  border-radius:12px;
+  padding:8px;
+}
+.actions{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:8px;
+  background:#171b33;
+  border-top:2px solid #30385f;
+}
+.log{
+  font-size:12px;
+  max-height:90px;
+  overflow-y:auto;
+  color:#dfe4ff;
+}
+.popup{
+  position:fixed;
+  inset:0;
+  background:#0009;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:99;
+}
+.popup.active{display:flex}
+.popup-box{
+  background:#1b213d;
+  border:2px solid #ffd166;
+  border-radius:18px;
+  padding:22px;
+  width:85%;
+  max-width:360px;
+  text-align:center;
+}
+.small{
+  font-size:12px;
+  opacity:.8;
+}
+</style>
 </head>
 
 <body>
 
-<h1>TCG Prototype</h1>
+<section id="homeScreen" class="screen active">
+  <div class="home">
+    <h1>TCG Prototype</h1>
+    <button class="menu-btn" onclick="showBattleMenu()">対戦</button>
+  </div>
+</section>
 
-<div class="top">
-  <button onclick="drawCard()">ドロー</button>
-  <button onclick="normalSummon()">通常召喚</button>
-  <button onclick="specialSummon()">特殊召喚</button>
-  <button onclick="attack()">攻撃</button>
-  <button onclick="endTurn()">ターン終了</button>
+<section id="battleMenuScreen" class="screen">
+  <div class="home">
+    <h1>対戦メニュー</h1>
+    <button class="menu-btn" onclick="startCpuBattle()">CPU戦①</button>
+    <button class="menu-btn" onclick="showHome()">戻る</button>
+  </div>
+</section>
+
+<section id="battleScreen" class="screen">
+  <div class="battle">
+    <div class="topbar">
+      <div>
+        <b id="turnText"></b>
+        <div class="small" id="phaseText"></div>
+      </div>
+      <button onclick="showHome()">ホーム</button>
+    </div>
+
+    <div class="field">
+      <div id="enemyArea"></div>
+
+      <div class="center">
+        <div><b>ログ</b></div>
+        <div id="log" class="log"></div>
+      </div>
+
+      <div id="playerArea"></div>
+    </div>
+
+    <div class="actions">
+      <button onclick="normalSummon()">通常召喚</button>
+      <button onclick="specialSummon()">特殊召喚</button>
+      <button onclick="attack()">攻撃</button>
+      <button onclick="useSelectedSpell()">スペル発動</button>
+      <button onclick="endTurn()">ターン終了</button>
+    </div>
+  </div>
+</section>
+
+<div id="popup" class="popup">
+  <div class="popup-box">
+    <h2 id="popupTitle"></h2>
+    <p id="popupText"></p>
+    <button onclick="closePopup()">OK</button>
+  </div>
 </div>
 
-<div id="turnText"></div>
-
-<div id="player2"></div>
-<div id="player1"></div>
-
-<h3>ログ</h3>
-<div class="log" id="log"></div>
-
 <script>
+const CARD_MASTER=[
+{id:"No.1",name:"仮カード1",type:"monster",attr:"火",rarity:1,atk:500,def:250,dmg:1},
+{id:"No.2",name:"仮カード2",type:"monster",attr:"火",rarity:1,atk:500,def:500,dmg:1},
+{id:"No.3",name:"仮カード3",type:"monster",attr:"火",rarity:2,atk:1000,def:250,dmg:2},
+{id:"No.4",name:"壁モンスター",type:"monster",attr:"火",rarity:2,atk:500,def:2500,dmg:0},
+{id:"No.5",name:"速攻兵",type:"monster",attr:"火",rarity:3,atk:1300,def:1000,dmg:2},
+{id:"No.6",name:"守護兵",type:"monster",attr:"火",rarity:3,atk:1000,def:2000,dmg:1},
+{id:"No.7",name:"双剣兵",type:"monster",attr:"火",rarity:4,atk:1500,def:1000,dmg:2,attackLimit:2,effect:"2回攻撃可能"},
+{id:"No.8",name:"鉄壁兵",type:"monster",attr:"火",rarity:4,atk:750,def:3000,dmg:1,blockLimit:2,effect:"2回ブロック可能"},
+{id:"No.9",name:"レア5モンスター",type:"monster",attr:"火",rarity:5,atk:2500,def:2000,dmg:2,effect:"レア度合計5以上を墓地へ送って特殊召喚"},
+{id:"No.10",name:"暗殺竜",type:"monster",attr:"火",rarity:5,atk:1000,def:1000,dmg:4,effect:"レア度合計5以上を墓地へ送って特殊召喚"},
 
-const cards = [
-{
-  id:"No.1",
-  name:"仮カード1",
-  type:"monster",
-  rarity:1,
-  atk:500,
-  def:250,
-  dmg:1
-},
-{
-  id:"No.2",
-  name:"仮カード2",
-  type:"monster",
-  rarity:1,
-  atk:500,
-  def:500,
-  dmg:1
-},
-{
-  id:"No.3",
-  name:"仮カード3",
-  type:"monster",
-  rarity:2,
-  atk:1000,
-  def:250,
-  dmg:2
-},
-{
-  id:"No.4",
-  name:"壁モンスター",
-  type:"monster",
-  rarity:2,
-  atk:500,
-  def:2500,
-  dmg:0
-},
-{
-  id:"No.5",
-  name:"レア5モンスター",
-  type:"monster",
-  rarity:5,
-  atk:2500,
-  def:2000,
-  dmg:2
-},
-{
-  id:"S1",
-  name:"攻撃強化",
-  type:"spell",
-  effect:"ATK+500"
-}
+{id:"S1",name:"攻撃強化",type:"spell",effect:"自分の場の先頭モンスターのATK+500",spell:"atkUp"},
+{id:"S2",name:"防御強化",type:"spell",effect:"自分の場の先頭モンスターのDEF+500",spell:"defUp"},
+{id:"S3",name:"防御弱体",type:"spell",effect:"相手の場の先頭モンスターのDEF-500",spell:"defDown"},
+{id:"S4",name:"破壊魔法",type:"spell",effect:"DEF1000以下の相手モンスター1体を破壊",spell:"destroyWeak"},
+{id:"S5",name:"攻守変換",type:"spell",effect:"自分の場の先頭モンスターのATKをDEFと同じにする",spell:"defToAtk"}
 ];
 
-let players;
-let turn = 0;
-let selected = null;
-let summoned = false;
-let attackMode = false;
+let players=[];
+let turn=0;
+let selected=null;
+let normalSummoned=false;
+let pendingAttack=null;
+let logs=[];
+let turnCount=1;
+let firstTurn=true;
 
-function clone(card){
-  return JSON.parse(JSON.stringify(card));
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
+function showHome(){show("homeScreen")}
+function showBattleMenu(){show("battleMenuScreen")}
 
+function clone(c){
+  return JSON.parse(JSON.stringify({
+    ...c,
+    uid:crypto.randomUUID(),
+    attacksUsed:0,
+    blocksUsed:0,
+    tempAtk:null,
+    tempDef:null
+  }));
+}
 function makeDeck(){
-  let deck = [];
-
-  for(let i=0;i<3;i++){
-    deck.push(clone(cards[0]));
-    deck.push(clone(cards[1]));
-    deck.push(clone(cards[2]));
-    deck.push(clone(cards[3]));
-  }
-
-  deck.push(clone(cards[4]));
-  deck.push(clone(cards[5]));
-
+  let deck=[];
+  CARD_MASTER.forEach(c=>{
+    deck.push(clone(c));
+    if(c.type==="monster"&&c.rarity<=4) deck.push(clone(c));
+  });
   return shuffle(deck);
 }
-
-function shuffle(array){
-  for(let i=array.length-1;i>0;i--){
-    let j=Math.floor(Math.random()*(i+1));
-    [array[i],array[j]]=[array[j],array[i]];
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
   }
-  return array;
+  return a;
 }
 
-function startGame(){
-
-  players = [
-    {
-      name:"プレイヤー1",
-      life:20,
-      deck:makeDeck(),
-      hand:[],
-      field:[],
-      grave:[]
-    },
-    {
-      name:"プレイヤー2",
-      life:20,
-      deck:makeDeck(),
-      hand:[],
-      field:[],
-      grave:[]
-    }
+function startCpuBattle(){
+  players=[
+    {name:"プレイヤー",life:20,deck:makeDeck(),hand:[],battle:[],spell:[],grave:[]},
+    {name:"CPU",life:20,deck:makeDeck(),hand:[],battle:[],spell:[],grave:[]}
   ];
 
   for(let p of players){
-    for(let i=0;i<5;i++){
-      p.hand.push(p.deck.pop());
-    }
+    for(let i=0;i<5;i++) p.hand.push(p.deck.pop());
+  }
+
+  turn=Math.floor(Math.random()*2);
+  normalSummoned=false;
+  pendingAttack=null;
+  selected=null;
+  logs=[];
+  turnCount=1;
+  firstTurn=true;
+
+  show("battleScreen");
+
+  popup("先攻後攻決定",players[turn].name+"が先攻です。先攻1ターン目はドローなし。");
+  addLog(players[turn].name+"が先攻。");
+  render();
+}
+
+function current(){return players[turn]}
+function enemy(){return players[1-turn]}
+function getAtk(c){return c.tempAtk??c.atk??0}
+function getDef(c){return c.tempDef??c.def??0}
+function atkLimit(c){return c.attackLimit??1}
+function blockLimit(c){return c.blockLimit??1}
+
+function startTurn(){
+  normalSummoned=false;
+  pendingAttack=null;
+  selected=null;
+
+  current().battle.forEach(c=>{
+    c.attacksUsed=0;
+    c.blocksUsed=0;
+    c.tempAtk=null;
+    c.tempDef=null;
+  });
+
+  if(firstTurn){
+    firstTurn=false;
+    addLog("先攻1ターン目なのでドローなし。");
+  }else{
+    autoDraw();
   }
 
   render();
 }
 
-function currentPlayer(){
-  return players[turn];
-}
-
-function enemyPlayer(){
-  return players[1-turn];
-}
-
-function drawCard(){
-
-  let p=currentPlayer();
-
-  if(p.deck.length===0){
-    addLog(p.name+"は山札切れ");
+function autoDraw(){
+  const p=current();
+  if(p.deck.length<=0){
+    popup("山札切れ",p.name+"は山札が0枚です。敗北！");
     return;
   }
-
   p.hand.push(p.deck.pop());
-
-  addLog(p.name+"が1枚ドロー");
-
-  render();
+  addLog(p.name+"が自動ドロー。");
 }
 
 function normalSummon(){
+  const p=current();
+  if(!selected||selected.zone!=="hand"||selected.owner!==turn)return alert("自分の手札モンスターを選択");
+  const card=p.hand[selected.index];
+  if(card.type!=="monster")return alert("モンスターを選択");
+  if(card.rarity>=5)return alert("レア5以上は特殊召喚");
+  if(normalSummoned)return alert("通常召喚は1ターン1回");
+  if(p.battle.length>=5)return alert("バトルゾーン満員");
 
-  let p=currentPlayer();
-
-  if(summoned){
-    alert("通常召喚は1回まで");
-    return;
-  }
-
-  if(selected===null){
-    alert("手札モンスター選択");
-    return;
-  }
-
-  let card=p.hand[selected];
-
-  if(card.type!=="monster"){
-    alert("モンスター選択");
-    return;
-  }
-
-  if(card.rarity>=5){
-    alert("レア5以上は特殊召喚");
-    return;
-  }
-
-  p.hand.splice(selected,1);
-
-  p.field.push(card);
-
-  summoned=true;
-
-  addLog(card.name+"を通常召喚");
-
+  p.hand.splice(selected.index,1);
+  p.battle.push(card);
+  normalSummoned=true;
   selected=null;
-
+  addLog(card.name+"を通常召喚。");
   render();
 }
 
 function specialSummon(){
-
-  let p=currentPlayer();
-
-  if(selected===null){
-    alert("手札モンスター選択");
-    return;
-  }
-
-  let card=p.hand[selected];
-
-  if(card.rarity<5){
-    alert("レア5未満");
-    return;
-  }
+  const p=current();
+  if(!selected||selected.zone!=="hand"||selected.owner!==turn)return alert("自分の手札モンスターを選択");
+  const card=p.hand[selected.index];
+  if(card.type!=="monster")return alert("モンスターを選択");
+  if(card.rarity<5)return alert("レア5未満は通常召喚");
+  if(p.battle.length>=5)return alert("バトルゾーン満員");
 
   let total=0;
+  let mats=[];
+  for(let i=0;i<p.battle.length;i++){
+    total+=p.battle[i].rarity;
+    mats.push(i);
+    if(total>=card.rarity)break;
+  }
+  if(total<card.rarity)return alert("素材レア度が足りない");
 
-  for(let c of p.field){
-    total+=c.rarity;
+  let names=[];
+  for(let i=mats.length-1;i>=0;i--){
+    const sent=p.battle.splice(mats[i],1)[0];
+    names.push(sent.name);
+    p.grave.push(sent);
   }
 
-  if(total<card.rarity){
-    alert("素材不足");
-    return;
-  }
-
-  while(total>=card.rarity){
-
-    let send=p.field.shift();
-
-    total-=send.rarity;
-
-    p.grave.push(send);
-  }
-
-  p.hand.splice(selected,1);
-
-  p.field.push(card);
-
-  addLog(card.name+"を特殊召喚");
-
+  p.hand.splice(selected.index,1);
+  p.battle.push(card);
   selected=null;
-
+  addLog(names.reverse().join("、")+"を墓地へ送り、"+card.name+"を特殊召喚。");
   render();
 }
 
 function attack(){
+  const p=current();
+  const e=enemy();
 
-  let p=currentPlayer();
-  let e=enemyPlayer();
-
-  if(selected===null){
-    alert("攻撃モンスター選択");
+  if(!pendingAttack){
+    if(!selected||selected.zone!=="battle"||selected.owner!==turn)return alert("攻撃する自分のモンスターを選択");
+    const attacker=p.battle[selected.index];
+    if(attacker.attacksUsed>=atkLimit(attacker))return alert("このモンスターは攻撃済み");
+    pendingAttack={index:selected.index};
+    selected=null;
+    addLog(attacker.name+"が攻撃宣言。相手モンスターがいる場合ブロック必須。");
+    render();
     return;
   }
 
-  let attacker=p.field[selected];
-
+  const attacker=p.battle[pendingAttack.index];
   if(!attacker){
-    alert("場のモンスター選択");
+    pendingAttack=null;
+    render();
     return;
   }
 
-  if(e.field.length>0){
+  const blockers=e.battle.filter(c=>c.blocksUsed<blockLimit(c));
 
-    let blocker=e.field[0];
-
-    if(attacker.atk>blocker.def){
-
-      e.grave.push(e.field.shift());
-
-      addLog(blocker.name+"を破壊");
-
-    }else if(attacker.atk<blocker.def){
-
-      p.grave.push(p.field.splice(selected,1)[0]);
-
-      addLog(attacker.name+"が破壊");
-
-    }else{
-
-      e.grave.push(e.field.shift());
-
-      p.grave.push(p.field.splice(selected,1)[0]);
-
-      addLog("相打ち");
+  if(blockers.length>0){
+    if(!selected||selected.zone!=="battle"||selected.owner!==1-turn){
+      return alert("相手モンスターでブロックしてください");
     }
 
+    const blocker=e.battle[selected.index];
+    if(blocker.blocksUsed>=blockLimit(blocker))return alert("このモンスターはブロック済み");
+
+    attacker.attacksUsed++;
+    blocker.blocksUsed++;
+
+    const atk=getAtk(attacker);
+    const def=getDef(blocker);
+
+    if(atk>def){
+      const dead=e.battle.splice(selected.index,1)[0];
+      e.grave.push(dead);
+      addLog(attacker.name+"が"+dead.name+"を破壊。");
+    }else if(atk<def){
+      const dead=p.battle.splice(pendingAttack.index,1)[0];
+      p.grave.push(dead);
+      addLog(dead.name+"が返り討ちで破壊。");
+    }else{
+      const deadA=p.battle.splice(pendingAttack.index,1)[0];
+      const deadB=e.battle.splice(selected.index,1)[0];
+      p.grave.push(deadA);
+      e.grave.push(deadB);
+      addLog("相打ち。");
+    }
   }else{
-
+    attacker.attacksUsed++;
     e.life-=attacker.dmg;
-
-    addLog(attacker.name+"が直接攻撃");
+    addLog(attacker.name+"が直接攻撃。"+e.name+"に"+attacker.dmg+"ダメージ。");
   }
 
+  pendingAttack=null;
+  selected=null;
   checkWin();
+  render();
+}
+
+function useSelectedSpell(){
+  const p=current();
+  const e=enemy();
+  if(!selected||selected.zone!=="hand"||selected.owner!==turn)return alert("自分の手札スペルを選択");
+  const card=p.hand[selected.index];
+  if(card.type!=="spell")return alert("スペルを選択");
+
+  p.hand.splice(selected.index,1);
+  p.grave.push(card);
+  addLog(card.name+"を発動。宣言時点で墓地へ。");
+
+  if(card.spell==="atkUp"){
+    const t=p.battle[0];
+    if(t){t.tempAtk=getAtk(t)+500;addLog(t.name+"のATK+500。")}
+  }
+  if(card.spell==="defUp"){
+    const t=p.battle[0];
+    if(t){t.tempDef=getDef(t)+500;addLog(t.name+"のDEF+500。")}
+  }
+  if(card.spell==="defDown"){
+    const t=e.battle[0];
+    if(t){t.tempDef=Math.max(0,getDef(t)-500);addLog(t.name+"のDEF-500。")}
+  }
+  if(card.spell==="destroyWeak"){
+    const idx=e.battle.findIndex(c=>getDef(c)<=1000);
+    if(idx>=0){
+      const dead=e.battle.splice(idx,1)[0];
+      e.grave.push(dead);
+      addLog(dead.name+"を破壊。");
+    }else addLog("破壊対象なし。");
+  }
+  if(card.spell==="defToAtk"){
+    const t=p.battle[0];
+    if(t){t.tempAtk=getDef(t);addLog(t.name+"のATKをDEFと同じにした。")}
+  }
 
   selected=null;
-
   render();
 }
 
 function endTurn(){
-
   turn=1-turn;
-
-  summoned=false;
-
-  selected=null;
-
-  addLog(currentPlayer().name+"のターン");
-
-  render();
-}
-
-function selectHand(index){
-
-  selected=index;
-
-  render();
-}
-
-function selectField(index){
-
-  selected=index;
-
-  render();
-}
-
-function addLog(text){
-
-  let log=document.getElementById("log");
-
-  log.innerHTML="・"+text+"<br>"+log.innerHTML;
+  turnCount++;
+  addLog(players[turn].name+"のターン。");
+  startTurn();
 }
 
 function checkWin(){
-
-  for(let p of players){
-
+  players.forEach(p=>{
     if(p.life<=0){
-
-      alert(p.name+"敗北");
+      popup("決着",p.name+"のライフが0。敗北！");
     }
-  }
+  });
 }
 
-function renderPlayer(player,index){
+function select(owner,zone,index){
+  selected={owner,zone,index};
+  render();
+}
 
-  let html=`
-  <div class="player ${turn===index ? "active":""}">
-    <h2>${player.name}</h2>
-    <div>LP:${player.life}</div>
+function addLog(t){
+  logs.unshift("・"+t);
+  if(logs.length>30)logs.pop();
+}
 
-    <h3>場</h3>
-    <div class="cards">
-  `;
+function popup(title,text){
+  document.getElementById("popupTitle").textContent=title;
+  document.getElementById("popupText").textContent=text;
+  document.getElementById("popup").classList.add("active");
+}
+function closePopup(){
+  document.getElementById("popup").classList.remove("active");
+  render();
+}
 
-  player.field.forEach((card,i)=>{
-
-    html+=`
-    <div
-      class="card ${selected===i && turn===index ? "selected":""}"
-      onclick="selectField(${i})"
-    >
-      <div class="name">${card.name}</div>
-
-      <div>★${card.rarity}</div>
-
-      <div>ATK:${card.atk}</div>
-      <div>DEF:${card.def}</div>
+function cardHTML(card,owner,zone,index){
+  const sel=selected&&selected.owner===owner&&selected.zone===zone&&selected.index===index;
+  const used=zone==="battle"&&(card.attacksUsed>0||card.blocksUsed>0);
+  return `
+  <div class="card ${card.type} ${sel?"selected":""} ${used?"used":""}" onclick="select(${owner},'${zone}',${index})">
+    <div class="card-name">${card.name}</div>
+    <div>${card.type==="monster"?"★"+card.rarity+" / "+card.attr:"スペル"}</div>
+    ${card.type==="monster"?`
+      <div>ATK:${getAtk(card)}</div>
+      <div>DEF:${getDef(card)}</div>
       <div>DMG:${card.dmg}</div>
-    </div>
-    `;
-  });
+      <div class="small">攻${card.attacksUsed}/${atkLimit(card)} 防${card.blocksUsed}/${blockLimit(card)}</div>
+    `:""}
+    <div class="effect">${card.effect??""}</div>
+  </div>`;
+}
 
-  html+=`</div>`;
+function slotHTML(cards,owner,zone,i){
+  if(cards[i])return cardHTML(cards[i],owner,zone,i);
+  return `<div class="slot">空</div>`;
+}
 
-  html+=`
-    <h3>手札</h3>
-    <div class="cards">
-  `;
+function areaHTML(player,owner,isEnemy){
+  return `
+  <div class="player-area ${turn===owner?"turn":""}">
+    <h3>${player.name} LP:${player.life}</h3>
+    <div class="small">山札:${player.deck.length} 手札:${player.hand.length} 墓地:${player.grave.length}</div>
 
-  player.hand.forEach((card,i)=>{
-
-    html+=`
-    <div
-      class="card ${card.type==="spell" ? "spell":""} ${selected===i && turn===index ? "selected":""}"
-      onclick="selectHand(${i})"
-    >
-      <div class="name">${card.name}</div>
-      <div>${card.type}</div>
-
-      ${
-        card.type==="monster"
-        ?
-        `
-        <div>★${card.rarity}</div>
-        <div>ATK:${card.atk}</div>
-        <div>DEF:${card.def}</div>
-        <div>DMG:${card.dmg}</div>
-        `
-        :
-        `
-        <div class="effect">${card.effect}</div>
-        `
-      }
-    </div>
-    `;
-  });
-
-  html+=`</div></div>`;
-
-  return html;
+    ${isEnemy?`
+      <div class="row-title">スペルゾーン</div>
+      <div class="zone">${[0,1,2,3,4].map(i=>slotHTML(player.spell,owner,"spell",i)).join("")}</div>
+      <div class="row-title">バトルゾーン</div>
+      <div class="zone">${[0,1,2,3,4].map(i=>slotHTML(player.battle,owner,"battle",i)).join("")}</div>
+    `:`
+      <div class="row-title">バトルゾーン</div>
+      <div class="zone">${[0,1,2,3,4].map(i=>slotHTML(player.battle,owner,"battle",i)).join("")}</div>
+      <div class="row-title">スペルゾーン</div>
+      <div class="zone">${[0,1,2,3,4].map(i=>slotHTML(player.spell,owner,"spell",i)).join("")}</div>
+      <div class="row-title">手札</div>
+      <div class="hand">${player.hand.map((c,i)=>cardHTML(c,owner,"hand",i)).join("")}</div>
+    `}
+  </div>`;
 }
 
 function render(){
-
-  document.getElementById("turnText").innerHTML=
-  "<h2>"+currentPlayer().name+"のターン</h2>";
-
-  document.getElementById("player1").innerHTML=
-  renderPlayer(players[0],0);
-
-  document.getElementById("player2").innerHTML=
-  renderPlayer(players[1],1);
+  if(!players.length)return;
+  document.getElementById("turnText").textContent=current().name+"のターン";
+  document.getElementById("phaseText").textContent="通常召喚："+(normalSummoned?"済":"未");
+  document.getElementById("enemyArea").innerHTML=areaHTML(players[1],1,true);
+  document.getElementById("playerArea").innerHTML=areaHTML(players[0],0,false);
+  document.getElementById("log").innerHTML=logs.join("<br>");
 }
-
-startGame();
-
 </script>
 
 </body>

@@ -3,768 +3,510 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>TCG Prototype</title>
 
 <style>
-
-*{
-box-sizing:border-box;
--webkit-tap-highlight-color:transparent;
-}
-
-body{
-margin:0;
-background:#070b18;
-color:white;
-font-family:sans-serif;
-padding-bottom:90px;
-}
-
-.topbar{
-position:sticky;
-top:0;
-z-index:50;
-background:#10183a;
-padding:12px;
-border-bottom:2px solid #1d2a68;
-}
-
-button{
-border:none;
-border-radius:12px;
-padding:12px;
-font-weight:bold;
-background:#536dff;
-color:white;
-}
-
-.home-screen{
-padding:14px;
-}
-
-.menu-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-margin-top:16px;
-}
-
-.menu-btn{
-height:100px;
-font-size:20px;
-border-radius:18px;
-background:#17214b;
-border:2px solid #394a96;
-display:flex;
-justify-content:center;
-align-items:center;
-}
-
-.cpu-select{
-margin-top:18px;
-background:#111936;
-padding:12px;
-border-radius:14px;
-border:2px solid #28366d;
-}
-
-.cpu-list{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-margin-top:10px;
-}
-
-.cpu-btn{
-background:#1c2858;
-}
-
-.game{
-padding:10px;
-}
-
-.player-area{
-background:#0d1431;
-border:2px solid #2d3f89;
-border-radius:18px;
-padding:10px;
-margin-bottom:14px;
-}
-
-.active-turn{
-border:2px solid gold;
-box-shadow:0 0 15px rgba(255,215,0,0.4);
-}
-
-.zone-title{
-font-weight:bold;
-margin:8px 0 4px;
-}
-
-.zone{
-display:grid;
-grid-template-columns:repeat(5,minmax(0,1fr));
-gap:4px;
-width:100%;
-overflow:hidden;
-}
-
-.slot{
-height:72px;
-min-width:0;
-border:1px dashed #4f587e;
-border-radius:10px;
-display:flex;
-justify-content:center;
-align-items:center;
-color:#6f789e;
-font-size:11px;
-background:#101427;
-overflow:hidden;
-}
-
-.card{
-width:100%;
-min-width:0;
-height:110px;
-overflow:hidden;
-background:#1f2854;
-border:1px solid #4d5ba5;
-border-radius:12px;
-padding:4px;
-font-size:10px;
-}
-
-.monster{
-background:#2a315f;
-}
-
-.spell{
-background:#16535c;
-}
-
-.card-name{
-font-size:11px;
-font-weight:bold;
-line-height:1.1;
-margin-bottom:2px;
-}
-
-.hand{
-display:grid;
-grid-template-columns:repeat(5,minmax(0,1fr));
-gap:4px;
-width:100%;
-}
-
-.bottom-actions{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#10183a;
-padding:8px;
-display:grid;
-grid-template-columns:repeat(5,1fr);
-gap:6px;
-z-index:100;
-}
-
-.bottom-actions button{
-padding:10px 4px;
-font-size:12px;
-}
-
-.log{
-background:black;
-padding:10px;
-border-radius:12px;
-margin:10px 0;
-font-size:13px;
-max-height:180px;
-overflow:auto;
-}
-
-.modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.75);
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:999;
-}
-
-.modal-box{
-background:#1b2147;
-padding:20px;
-border-radius:20px;
-width:85%;
-max-width:360px;
-border:3px solid #e2b84e;
-text-align:center;
-}
-
-.hidden{
-display:none;
-}
-
-h1,h2,h3{
-margin-top:0;
-}
-
-.small{
-font-size:12px;
-opacity:0.8;
-}
-
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#070b18;color:white;font-family:sans-serif;padding-bottom:90px}
+button{border:none;border-radius:12px;padding:12px;font-weight:bold;background:#536dff;color:white}
+button:disabled{background:#555;opacity:.6}
+.hidden{display:none!important}
+.topbar{position:sticky;top:0;z-index:50;background:#10183a;padding:12px;border-bottom:2px solid #1d2a68}
+.home-screen{padding:14px}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.menu-btn{height:90px;font-size:20px;border-radius:18px;background:#17214b;border:2px solid #394a96}
+.cpu-select{margin-top:18px;background:#111936;padding:12px;border-radius:14px;border:2px solid #28366d}
+.cpu-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.cpu-btn{background:#1c2858}
+.game{padding:10px}
+.player-area{background:#0d1431;border:2px solid #2d3f89;border-radius:18px;padding:10px;margin-bottom:14px}
+.active-turn{border-color:gold;box-shadow:0 0 15px rgba(255,215,0,.4)}
+.zone-title{font-weight:bold;margin:8px 0 4px}
+.zone{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;width:100%;overflow:hidden}
+.slot{height:76px;border:1px dashed #4f587e;border-radius:10px;display:flex;justify-content:center;align-items:center;color:#6f789e;font-size:11px;background:#101427;overflow:hidden}
+.card{width:100%;height:116px;overflow:hidden;background:#1f2854;border:1px solid #4d5ba5;border-radius:12px;padding:4px;font-size:10px}
+.monster{background:#2a315f}
+.spell{background:#16535c}
+.selected{outline:3px solid #ffd35a;box-shadow:0 0 10px #ffd35a}
+.card-name{font-size:11px;font-weight:bold;line-height:1.1;margin-bottom:2px}
+.hand{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;width:100%}
+.bottom-actions{position:fixed;bottom:0;left:0;right:0;background:#10183a;padding:8px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;z-index:100}
+.bottom-actions button{padding:10px 4px;font-size:12px}
+.log{background:black;padding:10px;border-radius:12px;margin:10px 0;font-size:13px;max-height:160px;overflow:auto}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;justify-content:center;align-items:center;z-index:999}
+.modal-box{background:#1b2147;padding:20px;border-radius:20px;width:85%;max-width:360px;border:3px solid #e2b84e;text-align:center}
+h1,h2,h3{margin-top:0}
+.small{font-size:12px;opacity:.8}
 </style>
 </head>
 
 <body>
 
 <div id="homeScreen" class="home-screen">
+  <h1>TCG Prototype</h1>
+  <div class="menu-grid">
+    <button class="menu-btn">対戦</button>
+    <button class="menu-btn">カード</button>
+    <button class="menu-btn">デッキ</button>
+    <button class="menu-btn">パック</button>
+  </div>
 
-<h1>TCG Prototype</h1>
-
-<div class="menu-grid">
-
-<div class="menu-btn">対戦</div>
-<div class="menu-btn">カード</div>
-<div class="menu-btn">デッキ</div>
-<div class="menu-btn">パック</div>
-
-</div>
-
-<div class="cpu-select">
-
-<h3>CPUレベル選択</h3>
-
-<div class="cpu-list">
-
-<button class="cpu-btn" onclick="startGame(1)">CPU Lv.1</button>
-<button class="cpu-btn" onclick="startGame(2)">CPU Lv.2</button>
-<button class="cpu-btn" onclick="startGame(3)">CPU Lv.3</button>
-<button class="cpu-btn" onclick="startGame(4)">CPU Lv.4</button>
-<button class="cpu-btn" onclick="startGame(5)">CPU Lv.5</button>
-<button class="cpu-btn" onclick="startGame(6)">CPU Lv.6</button>
-<button class="cpu-btn" onclick="startGame(7)">CPU Lv.7</button>
-<button class="cpu-btn" onclick="startGame(8)">CPU Lv.8</button>
-<button class="cpu-btn" onclick="startGame(9)">CPU Lv.9</button>
-<button class="cpu-btn" onclick="startGame(10)">CPU Lv.10</button>
-
-</div>
-
-</div>
-
+  <div class="cpu-select">
+    <h3>CPUレベル選択</h3>
+    <div class="cpu-list">
+      <button class="cpu-btn" onclick="startGame(1)">CPU Lv.1</button>
+      <button class="cpu-btn" onclick="startGame(2)">CPU Lv.2</button>
+      <button class="cpu-btn" onclick="startGame(3)">CPU Lv.3</button>
+      <button class="cpu-btn" onclick="startGame(4)">CPU Lv.4</button>
+      <button class="cpu-btn" onclick="startGame(5)">CPU Lv.5</button>
+      <button class="cpu-btn" onclick="startGame(6)">CPU Lv.6</button>
+      <button class="cpu-btn" onclick="startGame(7)">CPU Lv.7</button>
+      <button class="cpu-btn" onclick="startGame(8)">CPU Lv.8</button>
+      <button class="cpu-btn" onclick="startGame(9)">CPU Lv.9</button>
+      <button class="cpu-btn" onclick="startGame(10)">CPU Lv.10</button>
+    </div>
+  </div>
 </div>
 
 <div id="gameScreen" class="hidden">
+  <div class="topbar">
+    <div id="turnText"></div>
+    <div class="small" id="summonText"></div>
+  </div>
 
-<div class="topbar">
+  <div class="game">
+    <div id="enemyArea" class="player-area">
+      <h2 id="enemyName"></h2>
+      <div class="small" id="enemyInfo"></div>
 
-<div id="turnText"></div>
-<div class="small" id="summonText"></div>
+      <div class="zone-title">スペルゾーン</div>
+      <div class="zone" id="enemySpell"></div>
 
-</div>
+      <div class="zone-title">バトルゾーン</div>
+      <div class="zone" id="enemyBattle"></div>
+    </div>
 
-<div class="game">
+    <div class="log" id="log"></div>
 
-<div id="enemyArea" class="player-area">
+    <div id="playerArea" class="player-area">
+      <h2>プレイヤー LP:<span id="playerLP"></span></h2>
+      <div class="small" id="playerInfo"></div>
 
-<h2 id="enemyName"></h2>
+      <div class="zone-title">バトルゾーン</div>
+      <div class="zone" id="playerBattle"></div>
 
-<div class="small" id="enemyInfo"></div>
+      <div class="zone-title">スペルゾーン</div>
+      <div class="zone" id="playerSpell"></div>
 
-<div class="zone-title">スペルゾーン</div>
-<div class="zone" id="enemySpell"></div>
+      <div class="zone-title">手札</div>
+      <div class="hand" id="playerHand"></div>
+    </div>
+  </div>
 
-<div class="zone-title">バトルゾーン</div>
-<div class="zone" id="enemyBattle"></div>
-
-</div>
-
-<div class="log" id="log"></div>
-
-<div id="playerArea" class="player-area">
-
-<h2>プレイヤー LP:<span id="playerLP"></span></h2>
-
-<div class="small" id="playerInfo"></div>
-
-<div class="zone-title">バトルゾーン</div>
-<div class="zone" id="playerBattle"></div>
-
-<div class="zone-title">スペルゾーン</div>
-<div class="zone" id="playerSpell"></div>
-
-<div class="zone-title">手札</div>
-<div class="hand" id="playerHand"></div>
-
-</div>
-
-</div>
-
-<div class="bottom-actions">
-
-<button onclick="normalSummon()">通常召喚</button>
-<button onclick="tributeSummon()">生贄召喚</button>
-<button onclick="attack()">攻撃</button>
-<button onclick="spell()">スペル</button>
-<button onclick="endTurn()">終了</button>
-
-</div>
-
+  <div class="bottom-actions">
+    <button onclick="normalSummon()">通常召喚</button>
+    <button onclick="tributeSummon()">生贄召喚</button>
+    <button onclick="attack()">攻撃</button>
+    <button onclick="spell()">スペル</button>
+    <button onclick="endTurn()">終了</button>
+  </div>
 </div>
 
 <div id="modal" class="modal hidden">
-
-<div class="modal-box">
-
-<h2>先攻後攻決定</h2>
-
-<p id="modalText"></p>
-
-<button onclick="closeModal()">OK</button>
-
-</div>
-
+  <div class="modal-box">
+    <h2>先攻後攻決定</h2>
+    <p id="modalText"></p>
+    <button onclick="closeModal()">OK</button>
+  </div>
 </div>
 
 <script>
-
-const baseDeck = [
-
-{name:"火の小兵",type:"monster",core:1,atk:500,def:500,dmg:1},
-{name:"火炎兵",type:"monster",core:2,atk:1000,def:500,dmg:1},
-{name:"紅蓮守士",type:"monster",core:2,atk:500,def:1000,dmg:1},
-{name:"紅蓮騎士",type:"monster",core:3,atk:1000,def:1000,dmg:2},
-{name:"炎刃将",type:"monster",core:4,atk:1500,def:1000,dmg:3},
-{name:"炎帝竜",type:"monster",core:5,atk:2000,def:1500,dmg:4},
-
-{name:"炎刃強化",type:"spell"},
-{name:"弱体呪",type:"spell"},
-{name:"爆砕魔法",type:"spell"}
-
+const CARD_MASTER=[
+  {id:"No.1",name:"火の小兵",type:"monster",core:1,atk:500,def:500,dmg:1,copies:3},
+  {id:"No.2",name:"火炎兵",type:"monster",core:2,atk:1000,def:500,dmg:1,copies:3},
+  {id:"No.3",name:"紅蓮守士",type:"monster",core:2,atk:500,def:1000,dmg:1,copies:2},
+  {id:"No.4",name:"紅蓮闘士",type:"monster",core:3,atk:1000,def:1000,dmg:2,copies:2},
+  {id:"No.5",name:"爆炎騎士",type:"monster",core:4,atk:1500,def:1000,dmg:3,copies:2},
+  {id:"No.6",name:"炎帝竜",type:"monster",core:5,atk:2000,def:1500,dmg:4,copies:2,effect:"召喚時、相手モンスター1体のATKを500下げる"},
+  {id:"No.7",name:"炎刃強化",type:"spell",copies:2,effect:"自分モンスター1体のATKをこのターン中500上げる",spell:"atkUp"},
+  {id:"No.8",name:"火力封じ",type:"spell",copies:2,effect:"相手モンスター1体のATKを相手ターン中500下げる",spell:"atkDown"},
+  {id:"No.9",name:"爆砕魔法",type:"spell",copies:2,effect:"相手モンスター1体を破壊する",spell:"destroy"}
 ];
 
-let player;
-let enemy;
-let turnPlayer="player";
+let player,enemy,turnPlayer,cpuLevel;
 let normalUsed=false;
 let tributeUsed=false;
-let cpuLevel=1;
+let selected=null;
+let firstTurn=true;
+let turnCount=1;
+
+function clone(card){
+  return JSON.parse(JSON.stringify({
+    ...card,
+    uid:Math.random().toString(36).slice(2),
+    attacksUsed:0,
+    blocksUsed:0,
+    tempAtk:0,
+    permanentAtk:0
+  }));
+}
 
 function buildDeck(){
-
-let deck=[];
-
-for(let i=0;i<3;i++) deck.push({...baseDeck[0]});
-for(let i=0;i<3;i++) deck.push({...baseDeck[1]});
-for(let i=0;i<2;i++) deck.push({...baseDeck[2]});
-for(let i=0;i<2;i++) deck.push({...baseDeck[3]});
-for(let i=0;i<2;i++) deck.push({...baseDeck[4]});
-for(let i=0;i<2;i++) deck.push({...baseDeck[5]});
-for(let i=0;i<2;i++) deck.push({...baseDeck[6]});
-for(let i=0;i<2;i++) deck.push({...baseDeck[7]});
-for(let i=0;i<2;i++) deck.push({...baseDeck[8]});
-
-return shuffle(deck);
-
+  let deck=[];
+  CARD_MASTER.forEach(card=>{
+    for(let i=0;i<card.copies;i++) deck.push(clone(card));
+  });
+  return shuffle(deck);
 }
 
 function shuffle(arr){
-
-return arr.sort(()=>Math.random()-0.5);
-
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
 }
 
 function startGame(level){
+  cpuLevel=level;
+  player={lp:20,deck:buildDeck(),hand:[],battle:[],spell:[],grave:[]};
+  enemy={lp:20,deck:buildDeck(),hand:[],battle:[],spell:[],grave:[]};
 
-cpuLevel=level;
+  for(let i=0;i<5;i++){
+    draw(player);
+    draw(enemy);
+  }
 
-document.getElementById("homeScreen").classList.add("hidden");
-document.getElementById("gameScreen").classList.remove("hidden");
+  turnPlayer=Math.random()<0.5?"player":"enemy";
+  normalUsed=false;
+  tributeUsed=false;
+  selected=null;
+  firstTurn=true;
+  turnCount=1;
 
-player={
-lp:20,
-deck:buildDeck(),
-hand:[],
-battle:[],
-spell:[]
-};
+  document.getElementById("homeScreen").classList.add("hidden");
+  document.getElementById("gameScreen").classList.remove("hidden");
 
-enemy={
-lp:20,
-deck:buildDeck(),
-hand:[],
-battle:[],
-spell:[]
-};
+  document.getElementById("modal").classList.remove("hidden");
+  document.getElementById("modalText").innerHTML=
+    (turnPlayer==="player"?"プレイヤー":"CPU Lv."+cpuLevel)+
+    " が先攻です。<br>先攻1ターン目はドローなし・攻撃なし。";
 
-for(let i=0;i<5;i++){
-
-draw(player);
-draw(enemy);
-
-}
-
-turnPlayer=Math.random()<0.5?"player":"enemy";
-
-document.getElementById("modal").classList.remove("hidden");
-
-document.getElementById("modalText").innerHTML=
-(turnPlayer==="player"?"プレイヤー":"CPU Lv."+cpuLevel)
-+" が先攻です。<br>先攻1ターン目はドローなし。";
-
-addLog((turnPlayer==="player"?"プレイヤー":"CPU Lv."+cpuLevel)+"が先攻。");
-
-render();
-
-if(turnPlayer==="enemy"){
-
-setTimeout(cpuTurn,1000);
-
-}
-
+  addLog((turnPlayer==="player"?"プレイヤー":"CPU Lv."+cpuLevel)+"が先攻。");
+  render();
 }
 
 function closeModal(){
-
-document.getElementById("modal").classList.add("hidden");
-
+  document.getElementById("modal").classList.add("hidden");
+  if(turnPlayer==="enemy") setTimeout(cpuTurn,700);
 }
+
+function current(){return turnPlayer==="player"?player:enemy}
+function opponent(){return turnPlayer==="player"?enemy:player}
 
 function draw(target){
-
-if(target.deck.length>0){
-
-target.hand.push(target.deck.shift());
-
+  if(target.deck.length>0) target.hand.push(target.deck.shift());
 }
 
+function getAtk(card){
+  return Math.max(0,(card.atk||0)+(card.tempAtk||0)+(card.permanentAtk||0));
 }
 
-function render(){
-
-document.getElementById("turnText").innerHTML=
-(turnPlayer==="player"?"プレイヤー":"CPU Lv."+cpuLevel)+"のターン";
-
-document.getElementById("summonText").innerHTML=
-"通常召喚："+(normalUsed?"済":"未")
-+" / 生贄召喚："+(tributeUsed?"済":"未")
-+" / CPU Lv."+cpuLevel;
-
-document.getElementById("playerLP").innerText=player.lp;
-
-document.getElementById("enemyName").innerHTML=
-"CPU Lv."+cpuLevel+" LP:"+enemy.lp;
-
-document.getElementById("playerInfo").innerHTML=
-"山札:"+player.deck.length+" 手札:"+player.hand.length;
-
-document.getElementById("enemyInfo").innerHTML=
-"山札:"+enemy.deck.length+" 手札:"+enemy.hand.length;
-
-renderZone("playerBattle",player.battle);
-renderZone("playerSpell",player.spell);
-renderZone("enemyBattle",enemy.battle);
-renderZone("enemySpell",enemy.spell);
-
-renderHand();
-
-document.getElementById("playerArea").className=
-"player-area"+(turnPlayer==="player"?" active-turn":"");
-
-document.getElementById("enemyArea").className=
-"player-area"+(turnPlayer==="enemy"?" active-turn":"");
-
-}
-
-function renderZone(id,data){
-
-const zone=document.getElementById(id);
-
-zone.innerHTML="";
-
-for(let i=0;i<5;i++){
-
-const slot=document.createElement("div");
-
-if(data[i]){
-
-slot.className="card "+data[i].type;
-
-slot.innerHTML=cardHTML(data[i]);
-
-}else{
-
-slot.className="slot";
-slot.innerHTML="空";
-
-}
-
-zone.appendChild(slot);
-
-}
-
-}
-
-function renderHand(){
-
-const hand=document.getElementById("playerHand");
-
-hand.innerHTML="";
-
-player.hand.forEach(card=>{
-
-const div=document.createElement("div");
-
-div.className="card "+card.type;
-
-div.innerHTML=cardHTML(card);
-
-hand.appendChild(div);
-
-});
-
-}
-
-function cardHTML(card){
-
-if(card.type==="monster"){
-
-return `
-<div class="card-name">${card.name}</div>
-<div>コア${card.core}</div>
-<div>ATK:${card.atk}</div>
-<div>DEF:${card.def}</div>
-<div>DMG:${card.dmg}</div>
-`;
-
-}
-
-return `
-<div class="card-name">${card.name}</div>
-<div>スペル</div>
-`;
-
+function selectCard(owner,zone,index){
+  if(turnPlayer==="enemy") return;
+  selected={owner,zone,index};
+  render();
 }
 
 function normalSummon(){
+  if(turnPlayer!=="player") return;
+  if(normalUsed) return alert("通常召喚は1ターン1回まで");
+  if(!selected || selected.owner!=="player" || selected.zone!=="hand") return alert("手札のモンスターを選んでください");
 
-if(turnPlayer!=="player") return;
+  const card=player.hand[selected.index];
+  if(!card || card.type!=="monster") return alert("モンスターを選んでください");
+  if(card.core>=5) return alert("コア5以上は生贄召喚してください");
+  if(player.battle.length>=5) return alert("バトルゾーンが満員です");
 
-if(normalUsed){
-
-alert("通常召喚済み");
-return;
-
-}
-
-const card=player.hand.find(c=>c.type==="monster"&&c.core<=player.battle.length+1);
-
-if(!card){
-
-alert("召喚可能モンスターなし");
-return;
-
-}
-
-player.hand.splice(player.hand.indexOf(card),1);
-
-player.battle.push(card);
-
-normalUsed=true;
-
-addLog(card.name+"を通常召喚");
-
-render();
-
+  player.hand.splice(selected.index,1);
+  player.battle.push(card);
+  normalUsed=true;
+  selected=null;
+  addLog(card.name+"を通常召喚。");
+  render();
 }
 
 function tributeSummon(){
+  if(turnPlayer!=="player") return;
+  if(tributeUsed) return alert("生贄召喚は1ターン1回まで");
+  if(!selected || selected.owner!=="player" || selected.zone!=="hand") return alert("手札のコア5モンスターを選んでください");
 
-if(turnPlayer!=="player") return;
+  const card=player.hand[selected.index];
+  if(!card || card.type!=="monster") return alert("モンスターを選んでください");
+  if(card.core<5) return alert("コア5未満は通常召喚してください");
 
-if(tributeUsed){
+  const total=player.battle.reduce((s,c)=>s+c.core,0);
+  if(total<card.core) return alert("生贄のコア合計が足りません");
+  if(player.battle.length>=5) return alert("バトルゾーンが満員です");
 
-alert("生贄召喚済み");
-return;
+  let need=card.core;
+  let names=[];
+  while(need>0 && player.battle.length>0){
+    const m=player.battle.shift();
+    need-=m.core;
+    names.push(m.name);
+    player.grave.push(m);
+  }
 
+  player.hand.splice(selected.index,1);
+  player.battle.push(card);
+  tributeUsed=true;
+  selected=null;
+
+  addLog(names.join("、")+"を墓地へ送り、"+card.name+"を生贄召喚。");
+  summonEffect(card,player,enemy);
+  render();
 }
 
-const high=player.hand.find(c=>c.type==="monster"&&c.core>=5);
-
-if(!high){
-
-alert("生贄召喚可能カードなし");
-return;
-
-}
-
-let total=0;
-
-player.battle.forEach(m=>total+=m.core);
-
-if(total<high.core){
-
-alert("コア不足");
-return;
-
-}
-
-player.battle=[];
-
-player.hand.splice(player.hand.indexOf(high),1);
-
-player.battle.push(high);
-
-tributeUsed=true;
-
-addLog(high.name+"を生贄召喚");
-
-render();
-
+function summonEffect(card,me,op){
+  if(card.id==="No.6" && op.battle.length>0){
+    op.battle[0].permanentAtk-=500;
+    addLog(card.name+"の効果で"+op.battle[0].name+"のATKを500下げた。");
+  }
 }
 
 function attack(){
+  if(turnPlayer!=="player") return;
+  if(firstTurn) return alert("先攻1ターン目は攻撃できません");
+  if(!selected || selected.owner!=="player" || selected.zone!=="battle") return alert("攻撃する自分のモンスターを選んでください");
 
-if(turnPlayer!=="player") return;
+  const attacker=player.battle[selected.index];
+  if(!attacker) return;
+  if(attacker.attacksUsed>=1) return alert("このモンスターは攻撃済みです");
 
-if(player.battle.length===0) return;
-
-if(enemy.battle.length===0){
-
-enemy.lp-=player.battle[0].dmg;
-
-addLog(player.battle[0].name+"が直接攻撃");
-
-}else{
-
-enemy.battle.shift();
-
-addLog("相手モンスターを破壊");
-
+  resolveAttack(player,enemy,selected.index);
+  selected=null;
+  render();
+  checkWin();
 }
 
-render();
+function resolveAttack(atkSide,defSide,attackerIndex){
+  const attacker=atkSide.battle[attackerIndex];
+  if(!attacker) return;
 
-checkWin();
+  attacker.attacksUsed++;
 
+  const blockerIndex=defSide.battle.findIndex(c=>c.blocksUsed<1);
+
+  if(blockerIndex>=0){
+    const blocker=defSide.battle[blockerIndex];
+    blocker.blocksUsed++;
+
+    if(getAtk(attacker)>blocker.def){
+      defSide.grave.push(defSide.battle.splice(blockerIndex,1)[0]);
+      addLog(attacker.name+"が"+blocker.name+"を破壊。");
+    }else if(getAtk(attacker)<blocker.def){
+      atkSide.grave.push(atkSide.battle.splice(attackerIndex,1)[0]);
+      addLog(attacker.name+"が返り討ちで破壊。");
+    }else{
+      atkSide.grave.push(atkSide.battle.splice(attackerIndex,1)[0]);
+      defSide.grave.push(defSide.battle.splice(blockerIndex,1)[0]);
+      addLog("相打ち。");
+    }
+  }else{
+    defSide.lp-=attacker.dmg;
+    addLog(attacker.name+"が直接攻撃。"+attacker.dmg+"ダメージ。");
+  }
 }
 
 function spell(){
+  if(turnPlayer!=="player") return;
+  if(!selected || selected.owner!=="player" || selected.zone!=="hand") return alert("手札のスペルを選んでください");
 
-if(turnPlayer!=="player") return;
+  const card=player.hand[selected.index];
+  if(!card || card.type!=="spell") return alert("スペルを選んでください");
 
-const card=player.hand.find(c=>c.type==="spell");
+  player.hand.splice(selected.index,1);
+  player.grave.push(card);
+  selected=null;
+  addLog(card.name+"を発動。");
 
-if(!card){
+  if(card.spell==="atkUp"){
+    if(player.battle.length>0){
+      player.battle[0].tempAtk+=500;
+      addLog(player.battle[0].name+"のATK+500。");
+    }
+  }
 
-alert("スペルなし");
-return;
+  if(card.spell==="atkDown"){
+    if(enemy.battle.length>0){
+      enemy.battle[0].tempAtk-=500;
+      addLog(enemy.battle[0].name+"のATK-500。");
+    }
+  }
 
-}
+  if(card.spell==="destroy"){
+    if(enemy.battle.length>0){
+      const dead=enemy.battle.shift();
+      enemy.grave.push(dead);
+      addLog(dead.name+"を破壊。");
+    }
+  }
 
-player.hand.splice(player.hand.indexOf(card),1);
-
-player.spell.push(card);
-
-addLog(card.name+"発動");
-
-render();
-
+  render();
 }
 
 function endTurn(){
-
-turnPlayer=turnPlayer==="player"?"enemy":"player";
-
-normalUsed=false;
-tributeUsed=false;
-
-if(!(turnPlayer==="player"&&player.firstTurn)){
-
-draw(turnPlayer==="player"?player:enemy);
-
+  if(turnPlayer!=="player") return;
+  nextTurn();
 }
 
-render();
+function nextTurn(){
+  turnPlayer=turnPlayer==="player"?"enemy":"player";
+  normalUsed=false;
+  tributeUsed=false;
+  selected=null;
 
-if(turnPlayer==="enemy"){
+  current().battle.forEach(c=>{
+    c.attacksUsed=0;
+    c.blocksUsed=0;
+    c.tempAtk=0;
+  });
 
-setTimeout(cpuTurn,1000);
+  if(firstTurn){
+    firstTurn=false;
+    addLog("先攻1ターン目終了。");
+  }else{
+    draw(current());
+    addLog((turnPlayer==="player"?"プレイヤー":"CPU")+"が1枚ドロー。");
+  }
 
-}
+  render();
 
+  if(turnPlayer==="enemy") setTimeout(cpuTurn,700);
 }
 
 function cpuTurn(){
+  if(turnPlayer!=="enemy") return;
 
-const card=enemy.hand.find(c=>c.type==="monster");
+  addLog("CPU Lv."+cpuLevel+"が行動開始。");
 
-if(card){
+  const normal=enemy.hand.find(c=>c.type==="monster"&&c.core<5);
+  if(normal && !normalUsed && enemy.battle.length<5){
+    enemy.hand.splice(enemy.hand.indexOf(normal),1);
+    enemy.battle.push(normal);
+    normalUsed=true;
+    addLog("CPUが"+normal.name+"を通常召喚。");
+  }
 
-enemy.hand.splice(enemy.hand.indexOf(card),1);
+  const high=enemy.hand.find(c=>c.type==="monster"&&c.core>=5);
+  const total=enemy.battle.reduce((s,c)=>s+c.core,0);
+  if(high && !tributeUsed && total>=high.core && enemy.battle.length<5){
+    let need=high.core;
+    while(need>0 && enemy.battle.length>0){
+      const m=enemy.battle.shift();
+      need-=m.core;
+      enemy.grave.push(m);
+    }
+    enemy.hand.splice(enemy.hand.indexOf(high),1);
+    enemy.battle.push(high);
+    tributeUsed=true;
+    addLog("CPUが"+high.name+"を生贄召喚。");
+    summonEffect(high,enemy,player);
+  }
 
-enemy.battle.push(card);
+  if(!firstTurn){
+    for(let i=0;i<enemy.battle.length;i++){
+      if(enemy.battle[i] && enemy.battle[i].attacksUsed<1){
+        resolveAttack(enemy,player,i);
+      }
+    }
+  }else{
+    addLog("先攻1ターン目なのでCPUは攻撃しない。");
+  }
 
-addLog("CPU Lv."+cpuLevel+"が"+card.name+"を召喚");
+  render();
+  checkWin();
 
-}
-
-if(enemy.battle.length){
-
-if(player.battle.length===0){
-
-player.lp-=enemy.battle[0].dmg;
-
-addLog(enemy.battle[0].name+"が直接攻撃");
-
-}else{
-
-player.battle.shift();
-
-addLog("CPUがモンスター破壊");
-
-}
-
-}
-
-render();
-
-checkWin();
-
-setTimeout(endTurn,1200);
-
-}
-
-function addLog(text){
-
-const log=document.getElementById("log");
-
-log.innerHTML="• "+text+"<br>"+log.innerHTML;
-
+  setTimeout(()=>nextTurn(),800);
 }
 
 function checkWin(){
-
-if(player.lp<=0){
-
-alert("敗北");
-location.reload();
+  if(player.lp<=0){
+    alert("敗北");
+    location.reload();
+  }
+  if(enemy.lp<=0){
+    alert("勝利");
+    location.reload();
+  }
 }
 
-if(enemy.lp<=0){
+function render(){
+  document.getElementById("turnText").innerHTML=(turnPlayer==="player"?"プレイヤー":"CPU Lv."+cpuLevel)+"のターン";
+  document.getElementById("summonText").innerHTML="通常召喚："+(normalUsed?"済":"未")+" / 生贄召喚："+(tributeUsed?"済":"未")+" / CPU Lv."+cpuLevel;
 
-alert("勝利");
-location.reload();
+  document.getElementById("playerLP").innerText=player.lp;
+  document.getElementById("enemyName").innerHTML="CPU Lv."+cpuLevel+" LP:"+enemy.lp;
+
+  document.getElementById("playerInfo").innerHTML="山札:"+player.deck.length+" 手札:"+player.hand.length+" 墓地:"+player.grave.length;
+  document.getElementById("enemyInfo").innerHTML="山札:"+enemy.deck.length+" 手札:"+enemy.hand.length+" 墓地:"+enemy.grave.length;
+
+  renderZone("playerBattle",player.battle,"player","battle");
+  renderZone("playerSpell",player.spell,"player","spell");
+  renderZone("enemyBattle",enemy.battle,"enemy","battle");
+  renderZone("enemySpell",enemy.spell,"enemy","spell");
+  renderHand();
+
+  document.getElementById("playerArea").className="player-area"+(turnPlayer==="player"?" active-turn":"");
+  document.getElementById("enemyArea").className="player-area"+(turnPlayer==="enemy"?" active-turn":"");
 }
 
+function renderZone(id,data,owner,zoneName){
+  const zone=document.getElementById(id);
+  zone.innerHTML="";
+  for(let i=0;i<5;i++){
+    if(data[i]){
+      zone.innerHTML+=cardHTML(data[i],owner,zoneName,i);
+    }else{
+      zone.innerHTML+=`<div class="slot">空</div>`;
+    }
+  }
 }
 
+function renderHand(){
+  const hand=document.getElementById("playerHand");
+  hand.innerHTML="";
+  player.hand.forEach((card,i)=>{
+    hand.innerHTML+=cardHTML(card,"player","hand",i);
+  });
+}
+
+function cardHTML(card,owner,zone,index){
+  const isSelected=selected&&selected.owner===owner&&selected.zone===zone&&selected.index===index;
+  const click=owner==="player"?`onclick="selectCard('${owner}','${zone}',${index})"`:"";
+  if(card.type==="monster"){
+    return `
+    <div class="card monster ${isSelected?"selected":""}" ${click}>
+      <div class="card-name">${card.name}</div>
+      <div>コア${card.core}</div>
+      <div>ATK:${getAtk(card)}</div>
+      <div>DEF:${card.def}</div>
+      <div>DMG:${card.dmg}</div>
+    </div>`;
+  }
+  return `
+  <div class="card spell ${isSelected?"selected":""}" ${click}>
+    <div class="card-name">${card.name}</div>
+    <div>スペル</div>
+    <div>${card.effect}</div>
+  </div>`;
+}
+
+function addLog(text){
+  const log=document.getElementById("log");
+  log.innerHTML="• "+text+"<br>"+log.innerHTML;
+}
 </script>
 
 </body>
